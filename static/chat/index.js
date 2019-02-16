@@ -7,7 +7,7 @@ $(function() {
 
   // A handle to the "general" chat channel - the one and only channel we
   // will have in this sample app
-  var generalChannel;
+  var mexChannel;
 
   // The server will assign the client a random username - store that value
   // here
@@ -54,48 +54,36 @@ $(function() {
     // Initialize the Chat client
     Twilio.Chat.Client.create(data.token).then(client => {
       chatClient = client;
-      chatClient.getSubscribedChannels().then(createOrJoinGeneralChannel);
+      chatClient.getSubscribedChannels().then(createOrJoinMexChannel);
     });
   });
 
-  function createOrJoinGeneralChannel() {
+  function createOrJoinMexChannel() {
     // Get the general chat channel, which is where all the messages are
     // sent in this simple application
-    print('Attempting to join "general" chat channel...');
-    chatClient.getChannelByUniqueName('general')
+    print('Attempting to join chat channel created by MeX...');
+    chatClient.getChannelBySid('CH5bebc854632d4470ac9138498e4a6915')
     .then(function(channel) {
-      generalChannel = channel;
-      console.log('Found general channel:');
-      console.log(generalChannel);
+      mexChannel = channel;
+      console.log('Found channel:');
+      console.log(mexChannel);
       setupChannel();
     }).catch(function() {
       // If it doesn't exist, let's create it
-      console.log('Creating general channel');
-      chatClient.createChannel({
-        uniqueName: 'general',
-        friendlyName: 'General Chat Channel'
-      }).then(function(channel) {
-        console.log('Created general channel:');
-        console.log(channel);
-        generalChannel = channel;
-        setupChannel();
-      }).catch(function(channel) {
-        console.log('Channel could not be created:');
-        console.log(channel);
-      });
+      console.log('Could not find MeX channel');
     });
   }
 
   // Set up channel after it has been found
   function setupChannel() {
     // Join the general channel
-    generalChannel.join().then(function(channel) {
+    mexChannel.join().then(function(channel) {
       print('Joined channel as '
       + '<span class="me">' + username + '</span>.', true);
     });
 
     // Listen for new messages sent to the channel
-    generalChannel.on('messageAdded', function(message) {
+    mexChannel.on('messageAdded', function(message) {
       printMessage(message.author, message.body);
     });
   }
@@ -104,7 +92,7 @@ $(function() {
   var $input = $('#chat-input');
   $input.on('keydown', function(e) {
     if (e.keyCode == 13) {
-      generalChannel.sendMessage($input.val())
+      mexChannel.sendMessage($input.val());
       $input.val('');
     }
   });
